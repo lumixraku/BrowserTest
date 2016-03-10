@@ -1,0 +1,7 @@
+CACHE MANIFEST
+# Sun May 25 2014 20:13:39 GMT+0800 (China Standard Time)
+NETWORK:
+*
+CACHE:
+http://test1.dolphin-browser.com/pychen/ua/test.html
+./suites/rendering/csstoggle/csstoggle.jpg

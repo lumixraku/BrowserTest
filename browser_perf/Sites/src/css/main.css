@@ -1,0 +1,298 @@
+html,
+body
+{
+    font-family: 'Helvetica Neue', Helvetica, STHeiTi, sans-serif;
+    font-size: 32px;
+    background: url(http://dabblet.com/img/noise.png) hsl(24, 20%, 95%);
+    height: 100%;
+    color: #333;
+}
+
+.main-result
+{
+    display: flex;
+
+    height: 100px;
+}
+
+
+.score
+{
+    font-size: 40px;
+    font-weight: bolder;
+
+    text-align: center;
+}
+
+.periods
+{
+    display: flex;
+    flex-direction: row;
+
+    width: 100%;
+}
+
+.period
+{
+    flex: 1 0 0;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#period0
+{
+    line-height: 35px;
+
+    height: 35px;
+}
+
+#period1
+{
+    line-height: 45px;
+
+    height: 45px;
+}
+
+#period2
+{
+    line-height: 55px;
+
+    height: 55px;
+}
+
+
+#period3
+{
+    line-height: 65px;
+
+    height: 60px;
+}
+
+#period0.completed
+{
+    background: red;
+}
+
+#period1.completed
+{
+    background: orange;
+}
+
+#period2.completed
+{
+    background: purple;
+}
+
+#period3.completed
+{
+    background: lime;
+}
+
+#period4.completed
+{
+    background: blue;
+}
+
+#period5.completed
+{
+    background: yellow;
+}
+
+.zp
+{
+    background-color: black;
+}
+
+.zpp
+{
+    background: grey;
+}
+
+.zppp
+{
+    background: silver;
+}
+
+.zppp
+{
+    background: #e68a5c;
+}
+
+.zpppp
+{
+    background: #806666;
+}
+
+.zppppp
+{
+    background: #4c0000;
+}
+/*canvas部分============================================================*/
+.canvas-wrapper
+{
+    font-size: .7rem;
+
+    position: relative;
+
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+
+    margin: .5rem .2rem;
+
+    border-radius: .3rem;
+    box-shadow: 0 0 1px 1px rgba(127,127,127, .3);
+}
+
+.canvas-wrapper canvas
+{
+    width: 6rem;
+    height: 6rem;
+    margin: 0 auto;
+}
+.period-title,
+.periodInfo
+{
+    display: flex;
+
+    padding: .5rem;
+}
+.period-title
+{
+    padding: .5rem;
+
+    color: white;
+    background: rgba(70, 147, 55, .96);
+
+    justify-content: space-between;
+}
+.period-title .pass-stat
+{
+    font-size: .55rem;
+}
+
+
+.periodInfo
+{
+    flex-direction: column;
+}
+
+
+.period-time i
+{
+    display: inline-block;
+
+    width: .25rem;
+    height: .25rem;
+    padding: .2rem;
+}
+.period-time span
+{
+    color: #666;
+}
+/*----------------------------------------------------------------------------------*/
+.loading-area,
+.cache-area
+{
+    display: none;
+}
+
+.title
+{
+    line-height: 45px;
+
+    text-align: center;
+}
+
+.report-wrap,
+.finish-info
+{
+    font-size: .7rem;
+
+    width: 80%;
+    margin: 0 auto 20px;
+    padding: 10px;
+}
+
+.finish-info
+{
+    text-align: center;
+}
+
+
+.send-btn
+{
+    margin-top: 10px;
+    padding: 6px;
+
+    text-align: center;
+
+    color: #fff;
+    border-radius: 4px;
+    background: #119c06;
+}
+
+.test-msg
+{
+    width: 100%;
+    margin: 20px 0;
+
+    text-align: center;
+}
+
+.btn
+{
+    padding: 12px;
+
+    text-align: center;
+
+    color: #fff;
+    border-radius: 4px;
+}
+
+.btn.cancel
+{
+    background: #f00!important;
+}
+
+.set-repeat-time .btn
+{
+    margin-top: 10px;
+
+    background: #119c06;
+}
+
+.finish-info .btn
+{
+    font-size: 1.2em;
+
+    width: 100%;
+    margin: 20px 0;
+}
+
+.hide
+{
+    display: none;
+}
+
+.show
+{
+    display: block;
+}
+
+
+.stop
+{
+    background: #f00;
+}
+
+.success
+{
+    background-color: #119c06;
+}
+
+.failed
+{
+    background-color: #fd1c2d;
+}

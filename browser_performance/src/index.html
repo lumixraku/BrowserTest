@@ -1,0 +1,568 @@
+<!DOCTYPE HTML>
+<html manifest="browser_performance.appcache">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,user-scalable=no" />
+    <title>Browser Performance Test</title>
+
+    <link type="text/css" rel="stylesheet" href="../../../core/core.css" />
+    <script type="text/javascript" src="app/assert.js" data-how="embedded"></script>
+    <style>
+    .wrap {
+        float: left;
+    }
+    .main-result {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -moz-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-align: center;
+        height: 200px;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        -moz-align-items: center;
+        align-items: center;
+    }
+    .main-result span {
+        display: inline-block;
+        margin: 8px;
+        border: 1px solid black;
+        color: #fff;
+        text-align: center;
+    }
+    .score {
+        margin: -80px 50px 0;
+        text-align: right;
+        font-weight: bolder;
+        font-size: 40px;
+    }
+    #period0 {
+        width: 50px;
+        height: 35px;
+        line-height: 35px;
+    }
+    #period1 {
+        width: 60px;
+        height: 45px;
+        margin-top: -20px;
+        line-height: 45px;
+    }
+    #period2 {
+        width: 75px;
+        height: 55px;
+        margin-top: -50px;
+        line-height: 55px;
+    }
+    #period3 {
+        width: 85px;
+        height: 60px;
+        margin-top: -80px;
+        line-height: 65px;
+    }
+    .zp {
+        background-color: black;
+    }
+    .zpp {
+        background: grey;
+    }
+    .zppp {
+        background: silver;
+    }
+    .zppp {
+        background: #E68A5C;
+    }
+    .zpppp {
+        background: #806666;
+    }
+    .zppppp {
+        background: #4c0000;
+    }
+    #period0.completed {
+        background: red;
+    }
+    #period1.completed {
+        background: orange;
+    }
+    #period2.completed {
+        background: purple;
+    }
+    #period3.completed {
+        background: lime;
+    }
+    #period4.completed {
+        background: blue;
+    }
+    #period5.completed {
+        background: yellow;
+    }
+    .base-area {
+    }
+    .loading-area, .cache-area {
+        display: none;
+    }
+    .title {
+        text-align: center;
+        line-height: 45px;
+    }
+    .report-wrap, .finish-info {
+        width: 260px;
+        padding: 10px;
+        margin-bottom: 20px;
+        margin-left: 30px;
+        border: 1px solid #bbb;
+        border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25);
+        border-radius: 4px;
+        background: -webkit-gradient(top, #fff, #e6e6e6);
+        background: -moz-linear-gradient(top, #fff, #e6e6e6);
+        background: -webkit-linear-gradient(top, #fff, #e6e6e6);
+        background: -o-linear-gradient(top, #fff, #e6e6e6);
+        line-height: 30px;
+    }
+    .finish-info {
+        text-align: center;
+    }
+    .send-btn {
+        padding: 6px;
+        margin-top: 10px;
+        border-radius: 4px;
+        background: #119c06;
+        color: #fff;
+        text-align: center;
+    }
+    .test-msg {
+        width: 100%;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .btn {
+        padding: 12px;
+        border-radius: 4px;
+        color: #fff;
+        text-align: center;
+    }
+    .btn.cancel {
+        background: #ff0000!important;
+    }
+    .set-repeat-time .btn {
+        margin-top: 10px;
+        background: #119c06;
+    }
+    .finish-info .btn {
+        width: 100%;
+        margin:20px 0;
+        font-size: 1.2em;
+    }
+    .hide {
+        display: none;
+    }
+    .show {
+        display: block;
+    }
+    .stop {
+        background: #ff0000;
+    }
+    .success {
+        background-color: #119C06;
+    }
+    .failed {
+        background-color: #FD1C2D;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <section id="result" class="result">
+            <h1 class="title">Browser Performance</h1>
+            <div id="base-area" class="base-area"></div>
+            <div id="loading-area" class="loading-area"></div>
+            <div id="cache-area" class="cache-area"></div>
+            <!-- <div class="layout-top">布局区域</div> -->
+            <!-- <span class="titile">Browser Performance</span> -->
+            <div class="main-result"></div>
+            <div class="score">
+                <span class="cur-score"></span>
+                <span class="total"></span>
+            </div>
+            <div id="rendering-area" class="rendering-area"></div>
+            <!-- <div class="layout-bottom">布局区域</div> -->
+        </section>
+        <section id="report-wrap" class="report-wrap hide">
+            <div class="options">
+                <input type="radio" id="dolphin-kernel" name="browser" value="dolphin-kernel" checked="checked" />
+                <label for="dolphin-kernel">海豚浏览器-开启内核</label>
+                <br />
+                <input type="radio" id="dolphin" name="browser" value="dolphin" />
+                <label for="dolphin">海豚浏览器-关闭内核</label>
+                <br />
+                <input type="radio" id="dolphin-en-kernel" name="browser" value="dolphin-en-kernel" />
+                <label for="dolphin-en-kernel">海豚浏览器国际版-开启内核</label>
+                <br />
+                <input type="radio" id="dolphin-en" name="browser" value="dolphin-en" />
+                <label for="dolphin-en">海豚浏览器国际版-关闭内核</label>
+                <br />
+                <input type="radio" id="uc" name="browser" value="uc" />
+                <label for="uc">UC手机浏览器</label>
+                <br />
+                <input type="radio" id="baidu" name="browser" value="baidu" />
+                <label for="baidu">百度手机浏览器</label>
+                <br />
+                <input type="radio" id="liebao" name="browser" value="liebao" />
+                <label for="liebao">猎豹手机浏览器</label>
+                <br />
+                <input type="radio" id="chrome" name="browser" value="chrome" />
+                <label for="chrome">谷歌手机浏览器</label>
+                <br />
+                <input type="radio" id="default" name="browser" value="default" />
+                <label for="default">默认手机浏览器</label>
+                <br />
+                <input type="radio" id="pc" name="browser" value="pc" />
+                <label for="pc">桌面浏览器</label>
+                <br />
+            </div>
+            <div class="send-btn">发送测试结果</div>
+            <div class="test-msg">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        </section>
+        <div class="finish-info hide">
+            已测试
+            <span class="num-of-test-time"></span>次
+            <button class="stop-btn btn stop">停止本轮测试</button>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../core/core.js"></script>
+<script type="text/javascript" src="./setting.js"></script>
+<script>
+define(['util/zepto', 'app/flow', 'app/config', 'app/timer'], function($, flow, config, Timer) {
+    if (window.applicationCache) {
+
+        $(applicationCache).on('cached', function() {
+            window.browserTest.restart();
+        }).on('noupdate', function() {
+            if (!window.browserTest.status) {
+                window.browserTest.start();
+            }
+        }).on('error', function(e) {
+            console.log('cache error: ' + e);
+            window.browserTest.restart();
+        });
+    }
+
+    window.browserTest = {
+        version: 1.0,
+        repeatTimeKey: 'repeatTime',
+        numOfTestHasExecutedKey: 'numOfTestHasExecuted',
+        resultDom: $('.main-result'),
+        curScore: $('.cur-score'),
+        stopBtn: $('.stop-btn'),
+        sendBtn: $('.send-btn'),
+        testMsg: $('.test-msg'),
+        status: null, //测试状态的全局开关
+        startTag: 'start',
+        timer: null,
+        suiteTimer: {},
+        periodsTimer: {},
+        period: ['base', 'loading', 'cache', 'rendering'],
+        suites: {},
+        periodObj: {},
+        curTest: 0, //当前执行到第几个测试用例
+        totalTestsLen: 0, //所有用例总个数
+        totalTests: [], //所有用例集合
+        pass: 0, //成功的用例个数
+        fails: 0, //失败的用例个数
+        log: '',
+        testResult: {
+            all: {},
+            periods: {}
+        },
+        paramObj: {}, //参数对象
+        isRepeat: false, //标志  本次测试是否是循环测试
+        start: function() {
+            var self = this;
+            self.reset();
+            self.timer = new Timer();
+            self.bindEvent();
+            $.each(self.period, function(index, val) {
+                var periodTests = config[val],
+                    suiteObj;
+                //构造suite object
+                for (var i = 0, l = periodTests.length; i < l; i++) {
+                    suiteObj = {
+                        suite: periodTests[i],
+                        periodIndex: index,
+                        periodName: val,
+                        pass: true
+                    };
+                    suiteObj.isLast = (i == periodTests.length - 1);
+                    self.suites['suite' + (self.totalTestsLen + i)] = suiteObj;
+                }
+
+                //构造period object
+                self.periodObj[val] = {
+                    'total': periodTests.length,
+                    'pass': 0,
+                    'fail': 0,
+                    'elapsed': 0,
+                    'suites': {} //用例记录当前阶段所有用例
+                };
+                self.totalTests = self.totalTests.concat(periodTests);
+                self.totalTestsLen += periodTests.length;
+            });
+            //获取URL参数到对象中
+            self.getURLParam();
+            self.executeProgress();
+
+        },
+        progress: function() {
+            /*jshint loopfunc: true */
+            //初始化，所有用例进站
+            var self = this,
+                flowObj = flow();
+            for (var i = 0; i < self.totalTestsLen; i++) {
+                (function(i) {
+                    /*jshint unused:false */
+                    var suite = self.totalTests[i][1], //config中每个用例为一个数组[suitename, suite]
+                        mainSuite = suite,
+                        clearSuite;
+                    if (Object.prototype.toString.call(suite) == '[object Object]') {
+                        if (suite.prep) {
+                            //说明suite有preparation
+                            if (suite.prep.length === 0) { //该suite的preparation是同步的,就在其外面包一层seq
+                                flowObj.seq(function(next, err, result) {
+                                    try {
+                                        suite.prep();
+                                        next();
+                                    } catch (e) {
+                                        alert('第' + (i + 1) + '个用例准备失败，请刷新重试！');
+                                    }
+                                });
+                            } else {
+                                flowObj.seq(suite.prep);
+                            }
+                        }
+                        mainSuite = suite.test;
+                        clearSuite = suite.clear;
+                    }
+                    flowObj.seq(function(next, error, result) {
+                        //如果suite有preparation，这时suite的preparation已经执行完，开始该用例的计时
+                        self.curTest = i;
+                        self.suiteTimer['suite' + i] = {
+                            start: new Date().getTime()
+                        };
+                        next();
+                    }).seq(function(next, err, result) {
+                        try {
+                            //mainSuite(next);
+                            mainSuite.call(suite, next);
+                            if (mainSuite.length === 0) {
+                                next();
+                            }
+                        } catch (e) {
+                            next(null, 'failed');
+                        }
+                    }).seq(function(next, err, result) {
+                        if (result == 'failed') { //如果当前用例失败了，则直接next()
+                            next();
+                        } else {
+                            next(null, 'done');
+                        }
+                    });
+                    if (clearSuite) {
+                        flowObj.seq(function(next, err, result) { //用例的clear函数
+                            clearSuite();
+                            next();
+                        });
+                    }
+                })(i);
+            }
+
+            flowObj.seq(function(next) {
+                /*jshint unused:false */
+                self.end();
+            }).run();
+        },
+        end: function() {
+            var self = this,
+                elapsedTime = self.timer.elapsed() / 1000,
+                item, itemTimer, itemElapsed,
+                now = new Date();
+            self.log += 'Total elapsed time: ' + elapsedTime.toFixed(2) + 's';
+
+            //self.flowObj.destroy();
+
+            //测试结束后进行数据统计
+            self.testResult.day = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+            self.testResult.ua = window.navigator.userAgent.toLowerCase();
+            self.testResult.version = self.version;
+            self.testResult.all = {
+                total: self.totalTestsLen,
+                pass: self.pass,
+                fail: self.fails,
+                elapsed: self.timer.elapsed()
+            };
+            for (var i in self.suites) {
+                item = self.suites[i];
+                itemTimer = self.suiteTimer[i];
+                itemElapsed = itemTimer.end - itemTimer.start;
+                self.periodObj[item.periodName].suites[item.suite[0]] = itemElapsed;
+                self.periodObj[item.periodName].elapsed += itemElapsed;
+            }
+            //更新每阶段所用的时间
+            $.each(self.period, function(index, val) {
+                $('#period' + index).html(self.periodObj[val].elapsed);
+            });
+            self.testResult.periods = self.periodObj;
+            //计数加1
+            sessionStorage.setItem(self.numOfTestHasExecutedKey, (parseInt(sessionStorage.getItem(self.numOfTestHasExecutedKey)) + 1));
+            //如果传了参数且参数正确
+            if (self.isRepeat) {
+                self.testResult.browser = self.paramObj.browser;
+                self.sendResult();
+                self.showFinishInfo(parseInt(sessionStorage.getItem(self.numOfTestHasExecutedKey)));
+                self.doTestAgain();
+            } else {
+                self.showReportPanel();
+            }
+        },
+        //获取网页传递的参数  并验证正确性
+        //只有在不传参  和参数全部正确才返回true  才能开始测试
+        getURLParam: function() {
+            var self = this,
+                arr = [],
+                paramObj = self.paramObj,
+                paramsArr = (window.location.search !== '') ? window.location.search.slice(1).split('&') : [];
+            //参数填充
+            paramsArr.forEach(function(item) {
+                arr = item.split('='); //aaa=bbb  等号缺少值的一方则得到""  如果缺失等号则只有一个元素  arr[1]为undefined
+                paramObj[arr[0]] = arr[1] || '';
+            });
+            //判断是否是循环
+            //所有参数正确才是循环
+            if ('type' in paramObj && paramObj.type !== '' &&
+                'repeatTime' in paramObj && paramObj.repeatTime !== '' &&
+                'browser' in paramObj && paramObj.browser !== ''
+            ) {
+                self.isRepeat = true;
+            }
+        },
+        reset: function() {
+            var self = this;
+            self.periodObj = {};
+            self.suites = {};
+            self.totalTests = [];
+            self.totalTestsLen = 0;
+            self.timer = null;
+            self.status = null;
+        },
+        restart: function() {
+            window.location.reload();
+        },
+        failedUpdate: function() {
+            var self = this,
+                curSuite = self.suites['suite' + self.curTest];
+            curSuite.pass = false;
+            self.periodObj[curSuite.periodName].fail += 1;
+            self.fails += 1;
+        },
+        succeededUpdate: function() {
+            var self = this,
+                curSuite = self.suites['suite' + self.curTest],
+                curPeriodDomId = 'period' + curSuite.periodIndex;
+
+            self.periodObj[curSuite.periodName].pass += 1;
+            self.pass += 1;
+            self.curScore.html(self.pass);
+            if ($('#' + curPeriodDomId).length === 0) {
+                self.resultDom.append('<span id="' + curPeriodDomId + '" class="zp"></span>');
+            } else {
+                $('#' + curPeriodDomId)[0].className += 'p';
+            }
+            if (curSuite.isLast && self.periodObj[curSuite.periodName].fail === 0) {
+                $('#' + curPeriodDomId)[0].className = 'completed';
+            }
+        },
+        showReportPanel: function() {
+            $('#report-wrap').show();
+        },
+        bindEvent: function() {
+            var self = this;
+            self.sendBtn.on('click', function() {
+                self.testResult.browser = $('input[name=browser]:checked').val();
+                self.sendResult();
+            });
+            self.stopBtn.on('click', function() {
+                sessionStorage.removeItem(self.repeatTimeKey);
+                sessionStorage.removeItem(self.numOfTestHasExecutedKey);
+                self.stopBtn.removeClass('stop').addClass('success');
+                self.stopBtn.text('设置已清空');
+            });
+        },
+        sendResult: function() {
+            var self = this;
+            $.ajax({
+                type: 'POST',
+                url: '/record',
+                data: JSON.stringify(self.testResult),
+                success: function(data) {
+                    /*jshint unused:false */
+                    self.testMsg.text('结果保存成功!');
+                },
+                error: function(xhr, type) {
+                    /*jshint unused:false */
+                    self.testMsg.text('保存失败');
+                    console.log('结果保存失败，重试，请勿刷新！');
+                    console.log(xhr);
+                    console.log(type);
+                }
+            });
+        },
+        executeProgress: function() {
+            var self = this,
+                paramObj = self.paramObj,
+                repeatTimeKey = self.repeatTimeKey;
+
+            //测试开始
+            self.status = self.startTag;
+            $('.total').html('/ ' + self.totalTestsLen);
+            if (sessionStorage.getItem(repeatTimeKey) == null) { //第一次进入需要设置sessionStorage
+                if (self.isRepeat) {
+                    sessionStorage.setItem(repeatTimeKey, paramObj.repeatTime);
+                } else {
+                    sessionStorage.setItem(repeatTimeKey, 1);
+                }
+                sessionStorage.setItem(self.numOfTestHasExecutedKey, 0);
+            }
+            self.timer.start();
+            self.progress();
+        },
+        showFinishInfo: function(repeatTime) {
+            $('.num-of-test-time').text(repeatTime);
+            $('.finish-info').removeClass('hide').addClass('show');
+        },
+        doTestAgain: function() {
+            var self = this,
+                repeatTimeKey = self.repeatTimeKey,
+                hasExecutedKey = self.numOfTestHasExecutedKey;
+            if (parseInt(sessionStorage.getItem(hasExecutedKey)) < parseInt(sessionStorage.getItem(repeatTimeKey))) {
+                setTimeout(function() {
+                    //如果点击过停止测试  那么repeatTime会为null
+                    if (sessionStorage.getItem(repeatTimeKey) != null) {
+                        self.restart();
+                    }
+                }, 5000);
+            } else {
+                //本轮测试完毕
+                self.stopBtn.removeClass('stop').addClass('success').text('测试结束');
+                sessionStorage.removeItem(repeatTimeKey);
+                sessionStorage.removeItem(hasExecutedKey);
+            }
+        }
+    };
+    //window.browserTest.start();
+}).executeit();
+</script>
+
+</html>

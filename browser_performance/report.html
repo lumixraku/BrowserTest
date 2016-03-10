@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,user-scalable=no" />
+<title>Browser Performance Report</title>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
+<style>
+.title{
+	text-align: center;
+}
+.filter-wrap{
+	display: none;
+	z-index: 10;
+	position: absolute;
+	width: 300px;
+	padding: 10px;
+	line-height: 30px;
+	left: 10px;
+	border-radius: 4px;
+	border-color: rgba(0,0,0,0.15) rgba(0,0,0,0.15) rgba(0,0,0,0.25);
+	border: 1px solid #bbb;
+	background: -webkit-gradient(top,#fff,#e6e6e6);
+	background: -moz-linear-gradient(top,#fff,#e6e6e6);
+	background: -webkit-linear-gradient(top,#fff,#e6e6e6);
+	background: -o-linear-gradient(top,#fff,#e6e6e6);
+}
+</style>
+</head>
+
+<body>
+	<h1 class="title">Browser Performance Report</h1>
+	<div class="filter-btn-wrap">
+		<button class="filter-btn">筛选</button>
+		<button class="reset-btn">重置</button>
+	</div>
+	<section id="filter-wrap" class="filter-wrap">
+		<div class="options">
+			<input type="checkbox" id="dolphin-kernel" name="browser" value="dolphin-kernel" checked="checked" /><label for="dolphin-kernel">海豚浏览器-开启内核</label><br />
+			<input type="checkbox" id="dolphin" name="browser" value="dolphin" checked="checked" /><label for="dolphin">海豚浏览器-关闭内核</label><br />
+			<input type="checkbox" id="dolphin-en-kernel" name="browser" value="dolphin-en-kernel" /><label for="dolphin-en-kernel">海豚浏览器国际版-开启内核</label><br />
+			<input type="checkbox" id="dolphin-en" name="browser" value="dolphin-en" /><label for="dolphin-en">海豚浏览器国际版-关闭内核</label><br />
+			<input type="checkbox" id="uc" name="browser" value="uc" /><label for="uc">UC手机浏览器</label><br />
+			<input type="checkbox" id="baidu" name="browser" value="baidu" /><label for="baidu">百度手机浏览器</label><br />
+			<input type="checkbox" id="liebao" name="browser" value="liebao" /><label for="liebao">猎豹手机浏览器</label><br />
+			<input type="checkbox" id="chrome" name="browser" value="chrome" /><label for="chrome">谷歌手机浏览器</label><br />
+			<input type="checkbox" id="default" name="browser" value="default" /><label for="default">默认手机浏览器</label><br />
+			<input type="checkbox" id="pc" name="browser" value="pc" /><label for="pc">桌面浏览器</label><br />
+		</div>
+		<button class="filter-btn">确认</button>
+		<button class="cancel-btn">取消</button>
+	</section>
+
+	<section>
+		<div class="options">
+			<input type="radio" id="dev1" name="dev" value="huawei" /><label for="pc">低端机未知</label><br />
+			<input type="radio" id="dev2" name="dev" value="galaxy" checked="checked"/><label for="pc">高端机Nexus</label><br />
+		</div>
+		<button class="ok-btn">确认</button>
+		<button class="cancel-btn">取消</button>
+	</section>
+	<div class="report-container">
+		<div class="base-wrap"></div>
+		<div class="loading-wrap"></div>
+		<div class="cache-wrap"></div>
+		<div class="rendering-wrap"></div>
+	</div>
+</body>
+<script type="text/javascript">
+$(function () {
+	var filterWrap = $('#filter-wrap'),
+		reportData = null,
+		browserList = ['dolphin-kernel', 'dolphin', 'dolphin-en-kernel', 'dolphin-en', 'uc', 'baidu', 'liebao', 'pc', 'chrome', 'default'],
+		periods = ['base', 'loading', 'cache', 'rendering'],
+		seriesData = {};
+	getData();
+
+	function getData(){
+		$.ajax({
+			type: "GET",
+			url: 'http://localhost:8000/reportdata',
+			data: {
+				"dev":$('input[name=dev]:checked').val()
+			},
+			success: function(text){
+				reportData = text;
+				organizeData(browserList);
+				renderChart();
+			},
+			error: function(xhr, type){
+				console.log(xhr, type);
+				alert('数据获取失败，请刷新重试！');
+			}
+		});
+	}
+
+	function getMaxIndex(array){
+		return array.indexOf(Math.max.apply(Math, array));
+	}
+	function getMinIndex(array){
+		return array.indexOf(Math.min.apply(Math, array));
+	}
+
+	function renderChartByType(type){
+		$('.'+type+'-wrap').highcharts({
+			title: {
+				text: 'Browser Performance: '+type,
+				x: -20
+			},
+			xAxis: {
+				categories: ['第1次', '第2次', '第3次', '第4次', '第5次', '第6次', '第7次', '第8次', '第9次', '第10次', '第11次', '第12次', '第13次', '第14次', '第15次', '第16次', '第17次', '第18次', '第19次', '第20次', '第21次', '第22次', '第23次', '第24次', '第25次']
+			},
+			yAxis: {
+				title: {
+					text: 'Time (ms)'
+				},
+				plotLines: [{
+					value: 0,
+					width: 1,
+					color: '#808080'
+				}]
+			},
+			tooltip: {
+				valueSuffix: 'ms'
+			},
+			legend: {
+				layout: 'vertical',
+				align: 'right',
+				verticalAlign: 'middle',
+				borderWidth: 0
+			},
+			series: seriesData[type]
+		});
+	}
+
+	function renderChart(){
+		for(var i=0,l=periods.length; i<l; i++){
+			renderChartByType(periods[i]);
+		}
+	}
+
+	function organizeData(browserList){
+		var item, tempItem = {},
+			period, filterElapsed;
+		for(var i=0,l=reportData.length; i<l; i++){
+			item = reportData[i];
+			if(browserList.indexOf(item.browser) >= 0){
+				if(tempItem[item.browser]){
+					for(var periodKey in item.periodInfo){
+						tempItem[item.browser][periodKey].push(item.periodInfo[periodKey].elapsed);
+					}
+				}else{
+					tempItem[item.browser] = {};
+					for(var itemKey in item.periodInfo){
+						tempItem[item.browser][itemKey] = [item.periodInfo[itemKey].elapsed];
+					}
+				}
+			}
+		}
+
+		for(var j=0,len=periods.length; j<len; j++){
+			period = periods[j];
+			seriesData[period] = [];
+			for(var key in tempItem){
+				filterElapsed = tempItem[key][period];
+				filterElapsed = filterElapsed.splice(getMinIndex(filterElapsed), 1);
+				filterElapsed = filterElapsed.splice(getMaxIndex(filterElapsed), 1);
+				seriesData[period].push({
+					name: key,
+					data: tempItem[key][period]
+				});
+			}
+		}
+	}
+
+	//过滤框的显示与隐藏
+	$('.filter-btn-wrap').on('click', 'button.filter-btn', function(){
+		filterWrap.show();
+	})
+	.on('click', 'button.reset-btn', function(){
+		filterWrap.hide();
+		organizeData(browserList);
+		renderChart();
+	});
+
+	filterWrap.on('click', 'button.filter-btn', function(){
+		var checkedVal = $('input[name=browser]:checked'),
+			browserList = [];
+		for(var i=0,l=checkedVal.length; i<l; i++){
+			browserList.push(checkedVal[i].value);
+		}
+		filterWrap.hide();
+		organizeData(browserList);
+		renderChart();
+	})
+	.on('click', 'button.cancel-btn', function(){
+		filterWrap.hide();
+	});
+
+	$('button.ok-btn').click(function(event) {
+		$('.base-wrap,.loading-wrap,.cache-wrap,.rendering-wrap').html('');
+		seriesData = {};
+		reportData = null;
+		getData();
+	});
+});
+</script>
+</html>

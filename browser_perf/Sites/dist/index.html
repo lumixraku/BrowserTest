@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html manifest="browser_performance.appcache">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,user-scalable=no" />
+    <title>Browser Performance Test</title>
+    <link type="text/css" rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" rel="stylesheet" href="css/main.css">
+    <script src="zepto.js"></script>
+    <script type="text/javascript" src="app/assert.js" inline></script>
+</head>
+<body>
+    <script type="text/template" id="canvasTemp">
+        <div class="canvas-wrapper <%=periodName%>">
+            <div class="period-title">
+                <div class="item name">
+                    <%=periodName%>
+                </div>
+                <div class="item pass-stat">
+                    passed: <%=pass%>
+                </div>
+            </div>
+            <div class="periodInfo">
+                <canvas></canvas>
+                <div class="period-time">
+                    <div class="item">
+                        Total:
+                        <span class="time"><%=elapsed%> ms</span>
+                    </div>
+                    <%
+                    var i = 0;
+                    for(var key in suites ){
+                    %>
+                    <div class="item">
+                        <i style="background-color: <%=colors[i++]%> "></i>
+                        <%=key%>:
+                        <span class="time"><%=suites[key]%> ms</span>
+                    </div>
+                    <%}%>
+                </div>
+            </div>
+        </div>
+
+    </script>
+    <div class="wrap">
+        <section id="result" class="result">
+            <h1 class="title">Browser Performance</h1>
+            <div id="base-area" class="base-area"></div>
+            <div id="loading-area" class="loading-area"></div>
+            <div id="cache-area" class="cache-area"></div>
+            <div id="rendering-area" class="rendering-area"></div>
+            <div class="main-result">
+                <div class="periods">
+                </div>
+            </div>
+            <div class="score">
+                <span class="cur-score"></span>
+                <span class="total"></span>
+            </div>
+            <div class="canvas-list">
+            </div>
+        </section>
+        <section id="report-wrap" class="report-wrap hide">
+<!--             <div class="options">
+                <input type="radio" id="dolphin-kernel" name="browser" value="dolphin-kernel" checked="checked" />
+                <label for="dolphin-kernel">海豚浏览器-开启内核</label>
+                <br />
+                <input type="radio" id="dolphin" name="browser" value="dolphin" />
+                <label for="dolphin">海豚浏览器-关闭内核</label>
+                <br />
+                <input type="radio" id="dolphin-en-kernel" name="browser" value="dolphin-en-kernel" />
+                <label for="dolphin-en-kernel">海豚浏览器国际版-开启内核</label>
+                <br />
+                <input type="radio" id="dolphin-en" name="browser" value="dolphin-en" />
+                <label for="dolphin-en">海豚浏览器国际版-关闭内核</label>
+                <br />
+                <input type="radio" id="uc" name="browser" value="uc" />
+                <label for="uc">UC手机浏览器</label>
+                <br />
+                <input type="radio" id="baidu" name="browser" value="baidu" />
+                <label for="baidu">百度手机浏览器</label>
+                <br />
+                <input type="radio" id="liebao" name="browser" value="liebao" />
+                <label for="liebao">猎豹手机浏览器</label>
+                <br />
+                <input type="radio" id="chrome" name="browser" value="chrome" />
+                <label for="chrome">谷歌手机浏览器</label>
+                <br />
+                <input type="radio" id="default" name="browser" value="default" />
+                <label for="default">默认手机浏览器</label>
+                <br />
+                <input type="radio" id="pc" name="browser" value="pc" />
+                <label for="pc">桌面浏览器</label>
+                <br />
+            </div> -->
+            <div class="send-btn">发送测试结果</div>
+            <div class="test-msg">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        </section>
+        <div class="finish-info hide">
+            已测试
+            <span class="num-of-test-time"></span>次
+            <button class="stop-btn btn stop">停止本轮测试</button>
+        </div>
+    </div>
+</body>
+<script>
+var colors = ['#FF6347','#BDB76B','#FFD700','#FF4500','#FFFF00','#9ACD32','#FFD700'];
+var suiteTimer = {}; //记录所有用例的start  end  时间戳
+var curTest = 0; //当前执行到第几个测试用例
+</script>
+<script src="app/bundle.js"></script>
+
+</html>

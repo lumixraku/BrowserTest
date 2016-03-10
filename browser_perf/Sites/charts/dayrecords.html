@@ -1,0 +1,275 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1.0,user-scalable=no" />
+  <title>Browser Performance Report</title>
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript" src="highcharts.js"></script>
+  <style>
+  .title {
+    text-align: center;
+  }
+
+  .filter-wrap {
+    display: none;
+    z-index: 10;
+    position: absolute;
+    width: 300px;
+    padding: 10px;
+    line-height: 30px;
+    left: 10px;
+    border-radius: 4px;
+    border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25);
+    border: 1px solid #bbb;
+  }
+  </style>
+</head>
+
+<body>
+  <h1 class="title">Browser Performance Report</h1>
+  <div class="filter-btn-wrap">
+    <button class="filter-btn">筛选</button>
+    <button class="reset-btn">重置</button>
+  </div>
+  <section id="filter-wrap" class="filter-wrap">
+    <div class="options">
+      <input type="checkbox" id="uc" name="browser" value="UC" checked="true" />
+      <label for="uc">UC手机浏览器</label>
+      <br />
+      <input type="checkbox" id="baidu" name="browser" value="Baidu" checked="true" />
+      <label for="baidu">百度手机浏览器</label>
+      <br />
+      <input type="checkbox" id="firefox" name="browser" value="firefox" checked="true" />
+      <label for="firefox">FF手机浏览器</label>
+      <br />
+      <input type="checkbox" id="chrome" name="browser" value="Chrome" checked="true" />
+      <label for="chrome">谷歌手机浏览器</label>
+      <br />
+      <input type="checkbox" id="qq" name="browser" value="QQ" checked="true" />
+      <label for="qq">QQ手机浏览器</label>
+      <br />
+      <input type="checkbox" id="threesixzero" name="browser" value="360" checked="true" />
+      <label for="threesixzero">360浏览器</label>
+      <br />
+    </div>
+  </section>
+  <!--   <section>
+    <div class="options">
+      <input type="radio" id="dev1" name="dev" value="huawei" />
+      <label for="pc">低端机未知</label>
+      <br />
+      <input type="radio" id="dev2" name="dev" value="galaxy" checked="checked" />
+      <label for="pc">高端机Nexus</label>
+      <br />
+    </div>
+    <button class="ok-btn">确认</button>
+    <button class="cancel-btn">取消</button>
+  </section> -->
+  <div class="report-container">
+    <div class="base-wrap"></div>
+    <div class="loading-wrap"></div>
+    <div class="cache-wrap"></div>
+    <div class="rendering-wrap"></div>
+  </div>
+</body>
+<script type="text/javascript">
+$(function() {
+  var filterWrap = $('#filter-wrap'),
+    reportData = null, //全局  记录每一次测试后的结果
+    browserList = ['UC', 'Baidu', 'firefox', 'Chrome', 'QQ', '360'],
+    periods = ['base', 'loading', 'cache', 'rendering'],
+    seriesData = {
+      'base': {},
+      'loading': {},
+      'cache': {},
+      'rendering': {}
+    },
+    xAxis = [];
+  getData();
+
+  function getData() {
+    $.ajax({
+      type: "GET",
+      url: 'http://localhost:8000/dayrecords',
+      data: {
+        // "dev":$('input[name=dev]:checked').val()
+      },
+      success: function(text) {
+        console.log(text);
+        text.sort(ascendSortByName('day'));
+        reportData = text;
+        organizeData(browserList);
+        renderChart();
+      },
+      error: function(xhr, type) {
+        console.log(xhr, type);
+        alert('数据获取失败，请刷新重试！');
+      }
+    });
+  }
+
+  function getMaxIndex(array) {
+    return array.indexOf(Math.max.apply(Math, array));
+  }
+
+  function getMinIndex(array) {
+    return array.indexOf(Math.min.apply(Math, array));
+  }
+
+  function renderChartByType(type) { //渲染当前阶段的chart
+    var data = seriesData[type],
+      curChartData = [],
+      item, itemData, dayItem;
+    for (var key in data) {
+      item = data[key];
+      itemData = {
+        name: key,
+        data: []
+      }
+      for (var day in item) {
+        dayItem = item[day];
+        itemData.data.push({
+          x: dayItem.index,
+          y: parseFloat(dayItem.elapsed),
+          day: dayItem.day,
+          cases: dayItem.cases
+        });
+      }
+      if(key != 'Cheetah'){
+        curChartData.push(itemData);
+      }
+    }
+    $('.' + type + '-wrap').highcharts({
+      title: {
+        text: 'Browser Performance: ' + type,
+        x: -20
+      },
+      xAxis: {
+        categories: xAxis
+      },
+      yAxis: {
+        title: {
+          text: 'Time (ms)'
+        },
+        plotLines: [{
+          value: 0,
+          width: 1,
+          color: '#808080'
+        }]
+      },
+      tooltip: {
+        valueSuffix: 'ms',
+        formatter: function() {
+          point = this.point;
+          var tHtml = '<b style="font-size:14px;">' + point.day + '</b><br><b style="font-size:14px;">' + point.series.name + '：' + this.y + 'ms</b><br>';
+          for (var key in point.cases) {
+            tHtml += '<span>' + key + ': <b>' + point.cases[key] + 'ms</b></span><br>';
+          }
+          return tHtml;
+        }
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle',
+        borderWidth: 0
+      },
+      series: curChartData
+    });
+  }
+
+  function renderChart() {
+    for (var i = 0, l = periods.length; i < l; i++) {
+      renderChartByType(periods[i]);
+    }
+  }
+
+  function organizeData(browserList) {
+    var item, tempItem = {},
+      period, filterElapsed, periodData, index, periodInfo;
+    for (var i = 0, l = reportData.length; i < l; i++) {
+      item = reportData[i];
+      index = xAxis.length;
+      xAxis.push(item.day);
+      for (var periodKey in seriesData) {
+        //每个阶段的数据处理
+        periodData = item[periodKey];
+        for (var browserKey in periodData) {
+          //过滤每个浏览器
+          if (browserList.indexOf(browserKey) != -1) {
+            periodInfo = periodData[browserKey];
+            periodInfo.day = item.day;
+            periodInfo.index = i;
+            if (seriesData[periodKey][browserKey]) {
+              seriesData[periodKey][browserKey].push(periodInfo);
+            } else {
+              seriesData[periodKey][browserKey] = [periodInfo];
+            }
+          }
+        }
+      }
+    }
+  }
+  //对象数组排序
+  function ascendSortByName(name) {
+    return function(o, p) {
+      var a, b;
+      if (typeof o === "object" && typeof p === "object" && o && p) {
+        a = o[name];
+        b = p[name];
+        if (a === b) {
+          return 0;
+        }
+        if (typeof a === typeof b) {
+          return a < b ? -1 : 1;
+        }
+        return typeof a < typeof b ? -1 : 1;
+      } else {
+        throw ("error");
+      }
+    }
+  }
+
+  $('.filter-btn-wrap').on('click', 'button.filter-btn', function() {
+      filterWrap.show();
+    })
+    .on('click', 'button.reset-btn', function() {
+      filterWrap.hide();
+      organizeData(browserList);
+      renderChart();
+    });
+
+  filterWrap.on('click', 'button.ok-btn', function() {
+      var checkedVal = $('input[name=browser]:checked'),
+        browserList = [];
+      for (var i = 0, l = checkedVal.length; i < l; i++) {
+        browserList.push(checkedVal[i].value);
+      }
+      filterWrap.hide();
+      organizeData(browserList);
+      renderChart();
+    })
+    .on('click', 'button.cancel-btn', function() {
+      filterWrap.hide();
+    });
+
+  $('button.ok-btn').click(function(event) {
+    $('.base-wrap,.loading-wrap,.cache-wrap,.rendering-wrap').html('');
+    reportData = null;
+    seriesData = {
+      'base': {},
+      'loading': {},
+      'cache': {},
+      'rendering': {}
+    };
+    getData();
+  });
+
+
+});
+</script>
+
+</html>
